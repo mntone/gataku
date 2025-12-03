@@ -1,0 +1,56 @@
+paths:
+  archive: "out/archive"
+  download: "out/downloads"
+  logs: "out/logs"
+  tmp: "out/tmp"
+  hashdb_file: "out/hashdb.jsonl"
+  removed_log_file: "out/removed.jsonl"
+
+download:
+  filename_pattern: "{origin_group}/{yearmonth}/{screenname}-{datetime}-{index}.{ext}"
+  progress: filesize
+  includes:
+    gifv: false
+    video: false
+    audio: false
+    thumbnail_only: false
+    self: false
+    nsfw: true
+    try_unknown: false
+  rate:
+    default_rate: "2/minute"
+    burst_allowed: false
+  retry:
+    max_attempts: 3
+    delay: "10 seconds"
+    rate_control: true
+
+archive:
+  enabled: true
+  policy: keep_old
+  log_duplicates: true
+
+logging:
+  frequency: month
+  filename_pattern: "{origin_group}/{yearmonth}.jsonl"
+  log_removed: true
+  log_duplicate: true
+
+runtime:
+  dry_run: false
+  limit: 20
+  unbookmark: true
+
+instances:
+  - name: mastodon-example
+    base_url: https://mastodon.example
+    access_token: "YOUR_ACCESS_TOKEN"
+    account_id: "12345"
+    account_handle: "user"
+
+  - name: misskey-example
+    base_url: https://misskey.example
+    access_token: "YOUR_ACCESS_TOKEN"
+    account_handle: "username@mastodon.social"
+    unbookmark: false
+    rate: "4/minute"

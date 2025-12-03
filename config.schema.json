@@ -1,0 +1,310 @@
+{
+	"$schema": "https://json-schema.org/draft/2020-12/schema",
+	"title": "gataku configuration",
+	"description": "Top-level settings for the gataku archiver.",
+	"type": "object",
+	"properties": {
+		"paths": {
+			"type": "object",
+			"title": "Filesystem paths",
+			"description": "Override download/log/archive/tmp/hash DB locations.",
+			"properties": {
+				"download": {
+					"type": "string",
+					"description": "Root directory for downloaded media."
+				},
+				"logs": {
+					"type": "string",
+					"description": "Directory where log files are written."
+				},
+				"tmp": {
+					"type": "string",
+					"description": "Temporary directory for in-flight downloads."
+				},
+				"archive": {
+					"type": "string",
+					"description": "Archive directory used when deduplicating files."
+				},
+				"hashdb_file": {
+					"type": "string",
+					"description": "Path to the on-disk hash database (JSONL)."
+				},
+				"removed_log_file": {
+					"type": "string",
+					"description": "Path to the removed-media log (JSONL)."
+				},
+				"log_pattern": {
+					"type": "string",
+					"description": "Legacy logging template override."
+				}
+			},
+			"additionalProperties": false
+		},
+		"download": {
+			"type": "object",
+			"title": "Download configuration",
+			"description": "Controls filename patterns, rate limits, and media filters.",
+			"properties": {
+				"filename_pattern": {
+					"type": "string",
+					"description": "Template used when writing downloaded files."
+				},
+				"progress": {
+					"type": "string",
+					"enum": [
+						"off",
+						"count",
+						"filesize"
+					],
+					"description": "Progress output mode."
+				},
+				"useragent": {
+					"type": "string",
+					"description": "HTTP User-Agent sent during media downloads."
+				},
+				"includes": {
+					"type": "object",
+					"title": "Media filters",
+					"properties": {
+						"gifv": {
+							"type": "boolean",
+							"description": "Download GIFV attachments."
+						},
+						"video": {
+							"type": "boolean",
+							"description": "Download video attachments."
+						},
+						"audio": {
+							"type": "boolean",
+							"description": "Download audio attachments."
+						},
+						"thumbnail_only": {
+							"type": "boolean",
+							"description": "Allow media entries without remote_url."
+						},
+						"self": {
+							"type": "boolean",
+							"description": "Include posts from your own account."
+						},
+						"nsfw": {
+							"type": "boolean",
+							"description": "Allow posts marked as sensitive/NSFW."
+						},
+						"try_unknown": {
+							"type": "boolean",
+							"description": "Treat unknown media as images when extensions match."
+						}
+					},
+					"additionalProperties": false
+				},
+				"retry": {
+					"type": "object",
+					"title": "Retry policy",
+					"properties": {
+						"max_attempts": {
+							"type": "integer",
+							"minimum": 1,
+							"description": "Number of download attempts before failing."
+						},
+						"delay": {
+							"oneOf": [
+								{
+									"type": "number",
+									"exclusiveMinimum": 0
+								},
+								{
+									"$ref": "#/$defs/duration"
+								}
+							],
+							"description": "Delay between retries when rate_control is disabled."
+						},
+						"rate_control": {
+							"type": "boolean",
+							"description": "Whether to respect rate.delay between retries."
+						}
+					},
+					"additionalProperties": false
+				},
+				"rate": {
+					"type": "object",
+					"title": "Rate limiting",
+					"properties": {
+						"default_rate": {
+							"oneOf": [
+								{
+									"type": "number",
+									"exclusiveMinimum": 0
+								},
+								{
+									"$ref": "#/$defs/rate"
+								}
+							],
+							"description": "Default posts-per-minute rate (mutually exclusive with delay)."
+						},
+						"delay": {
+							"oneOf": [
+								{
+									"type": "number",
+									"exclusiveMinimum": 0
+								},
+								{
+									"$ref": "#/$defs/duration"
+								}
+							],
+							"description": "Fixed delay between downloads (mutually exclusive with default_rate)."
+						},
+						"burst_allowed": {
+							"type": "boolean",
+							"description": "Allow bursts instead of evenly spaced downloads."
+						}
+					},
+					"additionalProperties": false
+				}
+			},
+			"additionalProperties": false
+		},
+		"archive": {
+			"type": "object",
+			"title": "Archive policy",
+			"properties": {
+				"enabled": {
+					"type": "boolean",
+					"description": "Enable archive behavior instead of deleting duplicates."
+				},
+				"policy": {
+					"type": "string",
+					"enum": [
+						"keep_old",
+						"latest",
+						"database"
+					],
+					"description": "Behavior when encountering duplicates."
+				},
+				"keep_oldest": {
+					"type": "boolean",
+					"description": "Legacy toggle superseded by policy."
+				},
+				"log_duplicates": {
+					"type": "boolean",
+					"description": "Log duplicate events when encountered."
+				}
+			},
+			"additionalProperties": false
+		},
+		"logging": {
+			"type": "object",
+			"title": "Logging",
+			"properties": {
+				"frequency": {
+					"type": "string",
+					"description": "Controls log rotation frequency (day/week/month...)."
+				},
+				"filename_pattern": {
+					"type": "string",
+					"description": "Custom template for log file paths."
+				},
+				"log_removed": {
+					"type": "boolean",
+					"description": "Emit logs when media is skipped or removed."
+				},
+				"log_duplicate": {
+					"type": "boolean",
+					"description": "Emit logs when duplicates are detected."
+				}
+			},
+			"additionalProperties": false
+		},
+		"runtime": {
+			"type": "object",
+			"title": "Runtime defaults",
+			"properties": {
+				"dry_run": {
+					"type": "boolean",
+					"description": "When true, do not write files or modify bookmarks."
+				},
+				"limit": {
+					"type": "integer",
+					"minimum": 1,
+					"description": "Limit the number of statuses processed per run."
+				},
+				"unbookmark": {
+					"type": "boolean",
+					"description": "Whether to remove bookmarks after successful downloads."
+				}
+			},
+			"additionalProperties": false
+		},
+		"instances": {
+			"type": "array",
+			"title": "Configured instances",
+			"items": {
+				"type": "object",
+				"required": [
+					"name",
+					"base_url",
+					"access_token"
+				],
+				"properties": {
+					"name": {
+						"type": "string",
+						"description": "User-friendly label for this instance."
+					},
+					"base_url": {
+						"type": "string",
+						"minLength": 1,
+						"description": "Base URL (e.g., https://example.social)."
+					},
+					"access_token": {
+						"type": "string",
+						"description": "App access token."
+					},
+					"account_id": {
+						"type": [
+							"string",
+							"integer"
+						],
+						"description": "Numeric account ID for skip-self logic."
+					},
+					"account_handle": {
+						"type": "string",
+						"description": "Full @username@host handle used for skip-self checks."
+					},
+					"account_screen_name": {
+						"type": "string",
+						"description": "Legacy alias for account_handle."
+					},
+					"rate": {
+						"oneOf": [
+							{
+								"type": "number",
+								"exclusiveMinimum": 0
+							},
+							{
+								"$ref": "#/$defs/rate"
+							}
+						],
+						"description": "Per-instance rate limit (posts per minute)."
+					},
+					"unbookmark": {
+						"type": "boolean",
+						"description": "Override the global unbookmark flag for this instance."
+					}
+				},
+				"additionalProperties": false
+			}
+		}
+	},
+	"additionalProperties": true,
+	"$defs": {
+		"duration": {
+			"type": "string",
+			"pattern": "^\\s*[0-9]+(?:\\.[0-9]+)?(?:\\s+[A-Za-z][A-Za-z\\-]*)+(?:\\s+[0-9]+(?:\\.[0-9]+)?\\s+[A-Za-z][A-Za-z\\-]*)*\\s*$",
+			"description": "Human-friendly duration (e.g., '5 minutes', '2 hours 30 minutes')."
+		},
+		"rate": {
+			"type": "string",
+			"pattern": "^\\s*[0-9]+(?:\\.[0-9]+)?\\s*(?:/|per\\s+).+?$",
+			"description": "Rate expression such as '5/minute' or '2 per hour'."
+		}
+	}
+}

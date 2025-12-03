@@ -1,0 +1,8 @@
+{
+	"python.analysis.typeCheckingMode": "standard",
+	"yaml.schemas": {
+		"./config.schema.json": [
+			"config*.yaml"
+		]
+	}
+}
