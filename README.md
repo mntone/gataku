@@ -103,7 +103,20 @@ Useful CLI switches: `--limit`, `--dry-run`, `--dump-bookmarks`, and more—see
   | `{screenname}` | Username/handle from the status. |
   | `{index}` | Media index within the status (0-based in code, typically +1 in templates). |
   | `{ext}` | File extension derived from the media. |
-  | Date fields from `_date_vars`: `{year}`, `{yearmonth}`, `{date}`, `{month}`, `{week}`, `{yearweek}`, `{yearquarter}`, `{datetime}`. |
+
+  Date/time placeholders from `_date_vars` expand using the timestamp attached to each status.  
+  Examples below assume the initial commit timestamp `2025-12-04 00:19:59` (local server time):
+  | Placeholder     | Description                     | Example          |
+  | --------------- | ------------------------------- | ---------------- |
+  | `{year}`        | 4-digit year                    | `2025`           |
+  | `{yearmonth}`   | Compact year+month (`%Y%m`)     | `202512`         |
+  | `{date}`        | ISO date (`%Y-%m-%d`)           | `2025-12-04`     |
+  | `{month}`       | Month number (`01-12`)          | `12`             |
+  | `{week}`        | ISO week number (00-53)         | `49`             |
+  | `{quarter}`     | Quarter of the year (1-4)       | `4`              |
+  | `{yearweek}`    | ISO year/week (`%YW%V`)         | `2025W49`        |
+  | `{yearquarter}` | Year + quarter                  | `2025Q4`         |
+  | `{datetime}`    | Full timestamp (`%Y%m%d%H%M%S`) | `20251204001959` |
 
   These placeholders can be used in both `download.filename_pattern` and `logging.filename_pattern`.
 
