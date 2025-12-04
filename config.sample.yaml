@@ -7,27 +7,28 @@ paths:
   removed_log_file: "out/removed.jsonl"
 
 download:
+  # Template variables are documented in README (e.g., {origin_group}/{yearmonth}...).
   filename_pattern: "{origin_group}/{yearmonth}/{screenname}-{datetime}-{index}.{ext}"
-  progress: filesize
+  progress: filesize  # off / count / filesize
   includes:
-    gifv: false
-    video: false
-    audio: false
-    thumbnail_only: false
-    self: false
-    nsfw: true
-    try_unknown: false
+    gifv: false           # include animated GIFV clips
+    video: false          # include video attachments
+    audio: false          # include audio files
+    thumbnail_only: false # download entries with only thumbnails
+    self: false           # include posts authored by yourself
+    nsfw: true            # include NSFW/sensitive posts
+    try_unknown: false    # treat unknown media as images when extensions match
   rate:
-    default_rate: "2/minute"
-    burst_allowed: false
+    default_rate: "2/minute"  # accepts rates ("4/minute") or durations ("10 seconds")
+    burst_allowed: false      # true allows clumped bursts; false enforces spacing
   retry:
     max_attempts: 3
     delay: "10 seconds"
-    rate_control: true
+    rate_control: true  # true enforces download.rate delay between retries
 
 archive:
   enabled: true
-  policy: keep_old
+  policy: keep_old  # keep_old / latest / database (see README)
   log_duplicates: true
 
 logging:
@@ -37,12 +38,14 @@ logging:
   log_duplicate: true
 
 removed:
+  # Skip media URLs that returned 404 for this duration.
+  # Set to "off" to retry every run.
   skip_media_not_found: "1 week"
 
 runtime:
   dry_run: false
   limit: 20
-  unbookmark: true
+  unbookmark: true  # true removes the bookmark after successful download
 
 instances:
   - name: mastodon-example
@@ -55,5 +58,5 @@ instances:
     base_url: https://misskey.example
     access_token: "YOUR_ACCESS_TOKEN"
     account_handle: "username@mastodon.social"
-    unbookmark: false
-    rate: "4/minute"
+    unbookmark: false  # override per-instance unbookmark behavior
+    rate: "4/minute"   # per-instance rate limit (posts/minute)
