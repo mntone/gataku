@@ -267,8 +267,6 @@ def load_config(path: str | Path) -> GlobalConfig:
 			cfg.paths.hashdb_file = Path(r["hashdb_file"])
 		if "removed_log_file" in r:
 			cfg.paths.removed_log_file = Path(r["removed_log_file"])
-		if "log_pattern" in r:
-			cfg.logging.filename_pattern = r["log_pattern"]
 
 	# --- download -----------------------------------------------------
 	if "download" in raw:
@@ -337,10 +335,7 @@ def load_config(path: str | Path) -> GlobalConfig:
 	if "archive" in raw:
 		r = raw["archive"]
 		cfg.archive.enabled = r.get("enabled", cfg.archive.enabled)
-		if "policy" in r:
-			cfg.archive.policy = r["policy"]
-		elif "keep_oldest" in r:
-			cfg.archive.policy = "keep_old" if r["keep_oldest"] else "latest"
+		cfg.archive.policy = r.get("policy", cfg.archive.policy)
 		cfg.archive.log_duplicates = r.get("log_duplicates", cfg.archive.log_duplicates)
 
 	# --- logging ------------------------------------------------------

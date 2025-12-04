@@ -32,10 +32,6 @@
 				"removed_log_file": {
 					"type": "string",
 					"description": "Path to the removed-media log (JSONL)."
-				},
-				"log_pattern": {
-					"type": "string",
-					"description": "Legacy logging template override."
 				}
 			},
 			"additionalProperties": false
@@ -179,10 +175,6 @@
 						"database"
 					],
 					"description": "Behavior when encountering duplicates."
-				},
-				"keep_oldest": {
-					"type": "boolean",
-					"description": "Legacy toggle superseded by policy."
 				},
 				"log_duplicates": {
 					"type": "boolean",
