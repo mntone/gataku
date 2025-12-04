@@ -189,6 +189,22 @@
 			"properties": {
 				"frequency": {
 					"type": "string",
+					"enum": [
+						"day",
+						"daily",
+						"week",
+						"weekly",
+						"month",
+						"monthly",
+						"quarter",
+						"quarterly",
+						"half",
+						"semester",
+						"semiannual",
+						"year",
+						"yearly",
+						"annual"
+					],
 					"description": "Controls log rotation frequency (day/week/month...)."
 				},
 				"filename_pattern": {

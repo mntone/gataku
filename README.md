@@ -114,8 +114,10 @@ Useful CLI switches: `--limit`, `--dry-run`, `--dump-bookmarks`, and more—see
   | `{month}`       | Month number (`01-12`)          | `12`             |
   | `{week}`        | ISO week number (00-53)         | `49`             |
   | `{quarter}`     | Quarter of the year (1-4)       | `4`              |
+  | `{half}`        | Half of the year (1-2)          | `2`              |
   | `{yearweek}`    | ISO year/week (`%YW%V`)         | `2025W49`        |
   | `{yearquarter}` | Year + quarter                  | `2025Q4`         |
+  | `{yearhalf}`    | Year + half                     | `2025H2`         |
   | `{datetime}`    | Full timestamp (`%Y%m%d%H%M%S`) | `20251204001959` |
 
   These placeholders can be used in both `download.filename_pattern` and `logging.filename_pattern`.

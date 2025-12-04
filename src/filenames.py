@@ -16,6 +16,7 @@ def _date_vars(created: datetime) -> Dict[str, Any]:
 	"""Return common date/time components for template expansions."""
 	week = created.isocalendar().week
 	quarter = ((created.month - 1) // 3) + 1
+	half = 1 if created.month <= 6 else 2
 	return {
 		"year": created.strftime("%Y"),
 		"yearmonth": created.strftime("%Y%m"),
@@ -23,8 +24,10 @@ def _date_vars(created: datetime) -> Dict[str, Any]:
 		"month": created.strftime("%m"),
 		"week": f"{week:02d}",
 		"quarter": quarter,
+		"half": half,
 		"yearweek": f"{created.strftime('%Y')}W{week:02d}",
 		"yearquarter": f"{created.strftime('%Y')}Q{quarter}",
+		"yearhalf": f"{created.strftime('%Y')}H{half}",
 		"datetime": created.strftime("%Y%m%d%H%M%S"),
 	}
 
@@ -39,8 +42,10 @@ def _default_log_pattern(freq: str) -> str:
 		return "{origin_group}/{yearmonth}/{date}.jsonl"
 	if f in ("week", "weekly"):
 		return "{origin_group}/{yearweek}.jsonl"
-	if f == "quarter":
+	if f in ("quarter", "quarterly"):
 		return "{origin_group}/{yearquarter}.jsonl"
+	if f in ("half", "semester", "semiannual"):
+		return "{origin_group}/{yearhalf}.jsonl"
 	if f in ("year", "annual"):
 		return "{origin_group}/{year}.jsonl"
 	return "{origin_group}/{yearmonth}.jsonl"

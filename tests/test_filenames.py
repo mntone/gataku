@@ -58,16 +58,34 @@ def test_date_vars_generate_consistent_components():
 	assert vars["year"] == "2023"
 	assert vars["yearmonth"] == "202303"
 	assert vars["date"] == "2023-03-15"
+	assert vars["month"] == "03"
+	assert vars["week"] == "11"
+	assert vars["quarter"] == 1
+	assert vars["half"] == 1
 	assert vars["yearweek"].startswith("2023W")
 	assert vars["yearquarter"] == "2023Q1"
+	assert vars["yearhalf"] == "2023H1"
 
 
 def test_default_log_pattern_variants():
 	assert _default_log_pattern("day") == "{origin_group}/{yearmonth}/{date}.jsonl"
 	assert _default_log_pattern("week") == "{origin_group}/{yearweek}.jsonl"
 	assert _default_log_pattern("quarter") == "{origin_group}/{yearquarter}.jsonl"
+	assert _default_log_pattern("half") == "{origin_group}/{yearhalf}.jsonl"
 	assert _default_log_pattern("year") == "{origin_group}/{year}.jsonl"
 	assert _default_log_pattern("unknown") == "{origin_group}/{yearmonth}.jsonl"
+
+
+def test_build_log_path_supports_half_frequency(tmp_path):
+	cfg = GlobalConfig()
+	cfg.paths.logs = tmp_path
+	cfg.logging.frequency = "half"
+
+	status = make_status()
+	path = build_log_path(status, inst=None, config=cfg)
+
+	assert path.parent == tmp_path / "other"
+	assert path.name == "2023H1.jsonl"
 
 
 def test_build_tmp_path_uses_sha_prefix(tmp_path):
