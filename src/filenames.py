@@ -144,13 +144,13 @@ def build_log_path(
 
 	if url:
 		origin_host = classify_origin_host(url)
-		origin_group = classify_origin_group(origin_host)
+		origin_group = classify_origin_group(origin_host, config)
 	else:
 		origin_host = "unknown"
 		origin_group = "unknown"
 
 	account_host = classify_account_host(status)
-	account_group = classify_account_group(account_host)
+	account_group = classify_account_group(account_host, config)
 
 	created = parse_time(status["created_at"])
 

@@ -9,6 +9,7 @@ from config import (
 	GlobalConfig,
 	InstanceConfig,
 )
+from classify import classify_origin_group, classify_account_group
 from filters import should_skip
 from fetch import run_instance
 import types
@@ -100,6 +101,34 @@ download:
 	assert filter_cfg.include_thumbnail_only is True
 	assert filter_cfg.include_self is True
 	assert filter_cfg.include_nsfw is False
+
+
+def test_default_classification_rules_apply():
+	cfg = GlobalConfig()
+	assert classify_origin_group("media.misskeyusercontent.com", cfg) == "misskey"
+	assert classify_account_group("unknown.host", cfg) == "other"
+
+
+def test_load_config_classify_rules_override(tmp_path):
+	cfg_file = tmp_path / "config.yaml"
+	cfg_file.write_text(
+		"""
+download:
+  filename_pattern: "{origin}/{index}"
+classify:
+  rules:
+    - match: "*.example.com"
+      group: demo
+    - match: "*"
+      group: fallback
+""",
+		encoding="utf-8",
+	)
+
+	cfg = load_config(cfg_file)
+	assert cfg.classify.rules[0].match == "*.example.com"
+	assert classify_origin_group("cdn.EXAMPLE.com", cfg) == "demo"
+	assert classify_account_group("other.host", cfg) == "fallback"
 
 
 def test_load_config_download_user_agent(tmp_path):

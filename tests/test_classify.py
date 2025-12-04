@@ -24,9 +24,9 @@ def test_classify_origin_host_parses_hostname(url, expected):
 	"host,expected",
 	[
 		("Misskey.io", "misskey"),
-		("pawoo.net", "pawoo"),
 		("mastodon.social", "mastodon"),
 		("foo.mstdn.jp", "mastodon"),
+		("pawoo.net", "pawoo"),
 		("unknown.example", "other"),
 	],
 )

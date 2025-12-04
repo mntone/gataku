@@ -159,6 +159,36 @@
 			},
 			"additionalProperties": false
 		},
+		"classify": {
+			"type": "object",
+			"title": "Classification rules",
+			"description": "Map media/account hosts to logical group labels.",
+			"properties": {
+				"rules": {
+					"type": "array",
+					"description": "Rules evaluated in order; first matching glob wins.",
+					"items": {
+						"type": "object",
+						"required": [
+							"match",
+							"group"
+						],
+						"properties": {
+							"match": {
+								"type": "string",
+								"description": "Glob pattern matched against hostnames (case-insensitive)."
+							},
+							"group": {
+								"type": "string",
+								"description": "Group label stored in logs/database."
+							}
+						},
+						"additionalProperties": false
+					}
+				}
+			},
+			"additionalProperties": false
+		},
 		"archive": {
 			"type": "object",
 			"title": "Archive policy",

@@ -68,6 +68,9 @@ CLI には `--limit`, `--dry-run`, `--dump-bookmarks` などのオプション�
 - `logging` セクションを使ってログの出力先や頻度を制御します。
 - `archive.policy` により既存ファイルとの衝突時の動作を選択できます。
 - `removed.skip_media_not_found` で 404 を返したメディアを一定期間スキップできます（`off` で無効化）。
+- `classify.rules` でホスト名ごとの `{origin_group}` / `{account_group}` の分類を
+  上書きできます（各ルールは glob 形式の `match` と `group` を指定し、先に
+  マッチしたものが採用されます）。
 - `filename_pattern` では下記プレースホルダーを組み合わせて柔軟なフォルダ構成を作れます。
 
 ### メンテナンス

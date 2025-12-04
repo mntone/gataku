@@ -60,3 +60,18 @@ instances:
     account_handle: "username@mastodon.social"
     unbookmark: false  # override per-instance unbookmark behavior
     rate: "4/minute"   # per-instance rate limit (posts/minute)
+
+classify:
+  # Rules are matched in order; the first glob pattern that matches a host
+  # decides the group name written to logs/database.
+  rules:
+    - match: "*misskey*"
+      group: misskey
+    - match: "*mastodon*"
+      group: mastodon
+    - match: "*.mstdn.jp"
+      group: mastodon
+    - match: "pawoo.net"
+      group: pawoo
+    - match: "*"
+      group: other

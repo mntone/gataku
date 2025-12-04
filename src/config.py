@@ -6,6 +6,7 @@ import re
 import yaml
 
 from humanfriendly import parse_timespan
+from classify import DEFAULT_CLASSIFICATION_RULE_SPECS
 
 
 _RATE_PATTERN = re.compile(
@@ -252,6 +253,59 @@ class RuntimeConfig:
 
 
 ###############################################################################
+# Classification config
+###############################################################################
+
+@dataclass
+class ClassificationRule:
+	match: str
+	group: str
+
+
+def _default_classification_rules():
+	return [
+		ClassificationRule(match=spec["match"], group=spec["group"])
+		for spec in DEFAULT_CLASSIFICATION_RULE_SPECS
+	]
+
+
+@dataclass
+class ClassificationConfig:
+	rules: list[ClassificationRule] = field(default_factory=_default_classification_rules)
+
+
+def _parse_classification_rules(value) -> list[ClassificationRule]:
+	if value is None:
+		return []
+	if isinstance(value, dict) and "rules" in value:
+		value = value["rules"]
+
+	rule_entries: list[dict[str, str]]
+	if isinstance(value, dict):
+		rule_entries = [
+			{"match": str(pattern), "group": str(group)}
+			for pattern, group in value.items()
+		]
+	elif isinstance(value, list):
+		rule_entries = []
+		for entry in value:
+			if not isinstance(entry, dict):
+				raise TypeError("classification rules must be objects with match/group")
+			rule_entries.append(entry)
+	else:
+		raise TypeError("classify configuration must be a list or mapping")
+
+	parsed: list[ClassificationRule] = []
+	for entry in rule_entries:
+		match = entry.get("match")
+		group = entry.get("group")
+		if not match or not group:
+			raise ValueError("classification rules require both match and group")
+		parsed.append(ClassificationRule(match=str(match), group=str(group)))
+	return parsed
+
+
+###############################################################################
 # Global config root
 ###############################################################################
 
@@ -267,6 +321,7 @@ class GlobalConfig:
 
 	# multiple server configs
 	instances: list[InstanceConfig] = field(default_factory=list)
+	classify: ClassificationConfig = field(default_factory=ClassificationConfig)
 
 	config_file: Path | None = None
 
@@ -429,6 +484,12 @@ def load_config(path: str | Path) -> GlobalConfig:
 				)
 			)
 		cfg.instances = insts
+
+	# --- classify rules -----------------------------------------------
+	if "classify" in raw:
+		rules = _parse_classification_rules(raw["classify"])
+		if rules:
+			cfg.classify.rules = rules
 
 	return cfg
 

@@ -319,7 +319,7 @@ def process_status(
 
 	# account classification (same for whole status)
 	account_host = classify_account_host(status)
-	account_group = classify_account_group(account_host)
+	account_group = classify_account_group(account_host, config)
 
 	any_downloaded = False
 
@@ -336,7 +336,7 @@ def process_status(
 
 		# origin classification
 		origin_host = classify_origin_host(remote_url)
-		origin_group = classify_origin_group(origin_host)
+		origin_group = classify_origin_group(origin_host, config)
 
 		# download
 		label = None

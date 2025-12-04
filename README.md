@@ -69,6 +69,8 @@ Useful CLI switches: `--limit`, `--dry-run`, `--dump-bookmarks`, and more—see
 - `logging` controls log destination, frequency, and what gets recorded.
 - `archive.policy` instructs gataku how to handle existing duplicates.
 - `removed.skip_media_not_found` lets you cache 404 results (e.g., `"1 week"`) or set `off` to re-check every run.
+- `classify.rules` lets you override how hostnames map to `{origin_group}` / `{account_group}`
+  (each rule accepts a glob-style `match` and a `group` name; first match wins).
 - `filename_pattern` can use placeholders listed below to build descriptive paths.
 
 ### Maintenance
