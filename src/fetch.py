@@ -1,5 +1,6 @@
+import json
 import time
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 from pathlib import Path
 from urllib.parse import urlparse
 from typing import Any, Callable, Dict, Iterable
@@ -32,6 +33,68 @@ def _safe_parse_created(value: str | None) -> datetime | None:
 		return parse_time(value)
 	except Exception:
 		return None
+
+
+class RemovedMediaTracker:
+	"""
+	Track media URLs that recently returned media_not_found to avoid repeats.
+	"""
+
+	def __init__(self, removed_path: Path, window_seconds: float | None):
+		self.removed_path = removed_path
+		self.window_seconds = window_seconds or 0.0
+		self.enabled = self.window_seconds > 0
+		self._recent: dict[str, datetime] = {}
+		if self.enabled:
+			self._load_recent_entries()
+
+	def _parse_timestamp(self, value: str | None) -> datetime | None:
+		if not value:
+			return None
+		text = value.replace("Z", "+00:00")
+		try:
+			ts = datetime.fromisoformat(text)
+		except ValueError:
+			return None
+		# Normalize to timezone-aware UTC for consistent comparisons.
+		if ts.tzinfo is None:
+			return ts.replace(tzinfo=timezone.utc)
+		return ts.astimezone(timezone.utc)
+
+	def _load_recent_entries(self) -> None:
+		if not self.removed_path.exists():
+			return
+		cutoff = datetime.now(timezone.utc) - timedelta(seconds=self.window_seconds)
+		with open(self.removed_path, "r", encoding="utf-8") as f:
+			for line in f:
+				line = line.strip()
+				if not line:
+					continue
+				try:
+					entry = json.loads(line)
+				except json.JSONDecodeError:
+					continue
+				if entry.get("reason") != "media_not_found":
+					continue
+				ts = self._parse_timestamp(entry.get("time"))
+				if ts is None or ts < cutoff:
+					continue
+				for url in entry.get("media_urls") or []:
+					if url:
+						self._recent[url] = ts
+
+	def should_skip(self, url: str | None) -> bool:
+		if not self.enabled or not url:
+			return False
+		return url in self._recent
+
+	def record(self, urls: Iterable[str]) -> None:
+		if not self.enabled:
+			return
+		now = datetime.now(timezone.utc)
+		for url in urls:
+			if url:
+				self._recent[url] = now
 
 
 def log_download(
@@ -81,7 +144,6 @@ def log_download(
 	log_path.parent.mkdir(parents=True, exist_ok=True)
 
 	with open(log_path, "a", encoding="utf-8") as f:
-		import json
 		f.write(json.dumps(record) + "\n")
 
 
@@ -218,6 +280,7 @@ def process_status(
 	status_idx: int,
 	total_label: str,
 	progress_label: str | None = None,
+	removed_tracker: RemovedMediaTracker | None = None,
 ) -> bool:
 	"""
 	Process a single status
@@ -266,6 +329,11 @@ def process_status(
 		if not remote_url:
 			continue
 
+		if removed_tracker and removed_tracker.should_skip(remote_url):
+			if progress_mode != "off":
+				print(f"[{inst.name}] {status_idx}/{total_label} skip media_not_found_cached: {remote_url}")
+			continue
+
 		# origin classification
 		origin_host = classify_origin_host(remote_url)
 		origin_group = classify_origin_group(origin_host)
@@ -284,6 +352,8 @@ def process_status(
 		except requests.HTTPError as err:
 			status_code = err.response.status_code if err.response is not None else None
 			if status_code == 404:
+				if removed_tracker:
+					removed_tracker.record([remote_url])
 				if config.logging.log_removed:
 					log_removed(
 						db,
@@ -451,6 +521,11 @@ def run_instance(
 	progress_mode = (config.download.progress_level or "off").lower()
 	total_label = str(config.runtime.limit) if config.runtime.limit is not None else "∞"
 
+	removed_tracker = RemovedMediaTracker(
+		config.paths.removed_log_file,
+		config.removed.skip_media_not_found_for,
+	)
+
 	for status in api.fetch_bookmarks():
 		status_idx = count + 1
 		progress_label = None
@@ -475,6 +550,7 @@ def run_instance(
 			status_idx,
 			total_label,
 			progress_label=progress_label,
+			removed_tracker=removed_tracker,
 		)
 
 		delay = config.download.rate.delay_seconds

@@ -222,6 +222,31 @@
 			},
 			"additionalProperties": false
 		},
+		"removed": {
+			"type": "object",
+			"title": "Removed media handling",
+			"properties": {
+				"skip_media_not_found": {
+					"oneOf": [
+						{
+							"$ref": "#/$defs/duration"
+						},
+						{
+							"type": "number",
+							"exclusiveMinimum": 0
+						},
+						{
+							"type": "string",
+							"enum": [
+								"off"
+							]
+						}
+					],
+					"description": "Duration to skip retrying media URLs that previously returned 404. Use \"off\" to disable."
+				}
+			},
+			"additionalProperties": false
+		},
 		"runtime": {
 			"type": "object",
 			"title": "Runtime defaults",

@@ -68,6 +68,7 @@ Useful CLI switches: `--limit`, `--dry-run`, `--dump-bookmarks`, and more—see
 - `download.rate` and `download.retry` manage pacing and retry behavior.
 - `logging` controls log destination, frequency, and what gets recorded.
 - `archive.policy` instructs gataku how to handle existing duplicates.
+- `removed.skip_media_not_found` lets you cache 404 results (e.g., `"1 week"`) or set `off` to re-check every run.
 - `filename_pattern` can use placeholders listed below to build descriptive paths.
 
 ### Maintenance

@@ -36,6 +36,9 @@ logging:
   log_removed: true
   log_duplicate: true
 
+removed:
+  skip_media_not_found: "1 week"
+
 runtime:
   dry_run: false
   limit: 20

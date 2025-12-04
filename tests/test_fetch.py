@@ -1,4 +1,5 @@
 import datetime
+import json
 from pathlib import Path
 
 import requests
@@ -6,6 +7,7 @@ import requests
 from config import GlobalConfig, InstanceConfig
 from filenames import build_log_path
 from fetch import (
+	RemovedMediaTracker,
 	_safe_parse_created,
 	_guess_extension,
 	log_download,
@@ -33,6 +35,18 @@ class DummyDB:
 		self.logged.append(record)
 
 
+class DummyTracker:
+	def __init__(self, skipped=None):
+		self.skipped = set(skipped or [])
+		self.recorded = []
+
+	def should_skip(self, url):
+		return url in self.skipped
+
+	def record(self, urls):
+		self.recorded.extend(urls)
+
+
 def _make_config(tmp_path: Path, dry_run: bool = False) -> GlobalConfig:
 	cfg = GlobalConfig()
 	cfg.runtime.dry_run = dry_run
@@ -55,6 +69,7 @@ def _run_process_status(
 	sha="abc123",
 	download_func=None,
 	return_tmp=False,
+	removed_tracker=None,
 ):
 	tmpfile = tmp_path / "temp.bin"
 
@@ -78,6 +93,7 @@ def _run_process_status(
 		progress_mode="off",
 		status_idx=1,
 		total_label="1",
+		removed_tracker=removed_tracker,
 	)
 
 	tmp_value = tmpfile if return_tmp else None
@@ -328,6 +344,66 @@ def test_process_status_logs_media_not_found(monkeypatch, tmp_path):
 	assert calls == ["https://cdn.example/media/file.png"]
 
 
+def test_process_status_skips_urls_marked_missing(monkeypatch, tmp_path):
+	cfg = _make_config(tmp_path)
+	inst = InstanceConfig(
+		name="inst",
+		base_url="https://example",
+		access_token="token",
+	)
+	status = make_status()
+	db = DummyDB()
+	tracker = DummyTracker(skipped={"https://cdn.example/media/file.png"})
+
+	def failing_download(url, config, progress_label, tmpfile):
+		raise AssertionError("download should not run when tracker skips")
+
+	result, _ = _run_process_status(
+		status,
+		inst,
+		db,
+		cfg,
+		monkeypatch,
+		tmp_path,
+		download_func=failing_download,
+		removed_tracker=tracker,
+	)
+
+	assert result is False
+	assert not db.logged
+
+
+def test_process_status_records_media_not_found_in_tracker(monkeypatch, tmp_path):
+	cfg = _make_config(tmp_path)
+	inst = InstanceConfig(
+		name="inst",
+		base_url="https://example",
+		access_token="token",
+	)
+	status = make_status()
+	db = DummyDB()
+	tracker = DummyTracker()
+
+	response = requests.Response()
+	response.status_code = 404
+
+	def failing_download(url, config, progress_label, tmpfile):
+		raise requests.HTTPError(response=response)
+
+	_run_process_status(
+		status,
+		inst,
+		db,
+		cfg,
+		monkeypatch,
+		tmp_path,
+		download_func=failing_download,
+		removed_tracker=tracker,
+	)
+
+	assert tracker.recorded == ["https://cdn.example/media/file.png"]
+
+
 def test_log_removed_records_entry_when_not_dry_run():
 	cfg = GlobalConfig()
 	inst = InstanceConfig(
@@ -357,6 +433,33 @@ def test_log_removed_records_entry_when_not_dry_run():
 	assert entry["reason"] == "duplicate"
 	assert entry["instance_label"] == "inst"
 	assert entry["origin_group"] == "example"
+
+
+def test_removed_media_tracker_skips_recent_entries(tmp_path):
+	removed_path = tmp_path / "removed.jsonl"
+	entry = {
+		"time": datetime.datetime.now(datetime.timezone.utc).isoformat(),
+		"reason": "media_not_found",
+		"media_urls": ["https://cdn.example/media/file.png"],
+	}
+	removed_path.write_text(json.dumps(entry) + "\n", encoding="utf-8")
+
+	tracker = RemovedMediaTracker(removed_path, 3600)
+	assert tracker.should_skip("https://cdn.example/media/file.png") is True
+	assert tracker.should_skip("https://cdn.example/media/other.png") is False
+
+
+def test_removed_media_tracker_ignores_old_entries(tmp_path):
+	removed_path = tmp_path / "removed.jsonl"
+	entry = {
+		"time": "2010-01-01T00:00:00+00:00",
+		"reason": "media_not_found",
+		"media_urls": ["https://cdn.example/media/file.png"],
+	}
+	removed_path.write_text(json.dumps(entry) + "\n", encoding="utf-8")
+
+	tracker = RemovedMediaTracker(removed_path, 60)
+	assert tracker.should_skip("https://cdn.example/media/file.png") is False
 
 
 def test_log_removed_skips_when_dry_run():

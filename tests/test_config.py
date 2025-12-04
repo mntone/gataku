@@ -118,6 +118,34 @@ download:
 	assert cfg.download.user_agent == "custom-agent/2.0"
 
 
+def test_load_config_removed_skip_window(tmp_path):
+	cfg_file = tmp_path / "config.yaml"
+	cfg_file.write_text(
+		"""
+removed:
+  skip_media_not_found: "2 weeks"
+""",
+		encoding="utf-8",
+	)
+
+	cfg = load_config(cfg_file)
+	assert cfg.removed.skip_media_not_found_for == pytest.approx(_parse_delay_value("2 weeks"))
+
+
+def test_load_config_removed_skip_window_off(tmp_path):
+	cfg_file = tmp_path / "config.yaml"
+	cfg_file.write_text(
+		"""
+removed:
+  skip_media_not_found: off
+""",
+		encoding="utf-8",
+	)
+
+	cfg = load_config(cfg_file)
+	assert cfg.removed.skip_media_not_found_for is None
+
+
 def test_filter_flags_control_skip():
 	cfg = GlobalConfig()
 	cfg.download.filter.include_nsfw = False

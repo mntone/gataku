@@ -14,6 +14,7 @@ _RATE_PATTERN = re.compile(
 )
 
 DEFAULT_USER_AGENT = "gataku/1.0 (+https://github.com/mntone/gataku)"
+_OFF_SENTINELS = {"off"}  # extendable if more disable keywords are introduced
 
 
 def _ensure_quantity_expression(expr: str) -> str:
@@ -57,6 +58,31 @@ def _parse_delay_value(value: str | int | float) -> float:
 		return parse_timespan(_ensure_quantity_expression(text))
 
 	raise TypeError(f"Unsupported delay value type: {type(value)!r}")
+
+
+def _parse_optional_delay(value) -> float | None:
+	"""
+	Parse a delay duration that can be disabled by setting the value
+	to falsy markers like "off" or 0.
+	"""
+	if value is None:
+		return None
+	if isinstance(value, bool):
+		if value:
+			raise ValueError("Boolean true is not a valid duration")
+		return None
+	if isinstance(value, (int, float)):
+		if value <= 0:
+			return None
+		return _parse_delay_value(value)
+	if isinstance(value, str):
+		text = value.strip()
+		if not text:
+			return None
+		if text.lower() in _OFF_SENTINELS:
+			return None
+		return _parse_delay_value(text)
+	raise TypeError(f"Unsupported skip duration type: {type(value)!r}")
 
 
 def _parse_rate_per_minute(value: str | int | float) -> float:
@@ -205,6 +231,15 @@ class LoggingConfig:
 
 
 ###############################################################################
+# Removed media handling
+###############################################################################
+
+@dataclass
+class RemovedLogConfig:
+	skip_media_not_found_for: float | None = None
+
+
+###############################################################################
 # Runtime flags
 ###############################################################################
 
@@ -227,6 +262,7 @@ class GlobalConfig:
 	filter: ContentFilterConfig = field(default_factory=ContentFilterConfig)
 	archive: ArchivePolicyConfig = field(default_factory=ArchivePolicyConfig)
 	logging: LoggingConfig = field(default_factory=LoggingConfig)
+	removed: RemovedLogConfig = field(default_factory=RemovedLogConfig)
 	runtime: RuntimeConfig = field(default_factory=RuntimeConfig)
 
 	# multiple server configs
@@ -348,6 +384,12 @@ def load_config(path: str | Path) -> GlobalConfig:
 		for key in ("log_removed", "log_duplicate"):
 			if key in r:
 				setattr(cfg.logging, key, r[key])
+
+	# --- removed handling ---------------------------------------------
+	if "removed" in raw:
+		r = raw["removed"]
+		if "skip_media_not_found" in r:
+			cfg.removed.skip_media_not_found_for = _parse_optional_delay(r["skip_media_not_found"])
 
 	# --- runtime ------------------------------------------------------
 	if "runtime" in raw:

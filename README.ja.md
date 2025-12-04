@@ -67,6 +67,7 @@ CLI には `--limit`, `--dry-run`, `--dump-bookmarks` などのオプション�
 - `download.rate` と `download.retry` でレート制御とリトライ間隔を調整できます。
 - `logging` セクションを使ってログの出力先や頻度を制御します。
 - `archive.policy` により既存ファイルとの衝突時の動作を選択できます。
+- `removed.skip_media_not_found` で 404 を返したメディアを一定期間スキップできます（`off` で無効化）。
 - `filename_pattern` では下記プレースホルダーを組み合わせて柔軟なフォルダ構成を作れます。
 
 ### メンテナンス
