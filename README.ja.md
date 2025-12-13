@@ -2,6 +2,9 @@
 
 # gataku (画拓)
 
+[![License under GPLv3](https://forthebadge.com/api/badges/generate?panels=2&primaryLabel=LICENSE&secondaryLabel=GPL%203%2B&primaryBGColor=%23555555&primaryTextColor=%23FFFFFF&secondaryBGColor=%23007ec6&secondaryTextColor=%23FFFFFF&primaryFontSize=12&primaryFontWeight=300&primaryLetterSpacing=2&primaryFontFamily=Montserrat&primaryTextTransform=uppercase&secondaryFontSize=12&secondaryFontWeight=900&secondaryLetterSpacing=2&secondaryFontFamily=Montserrat&secondaryTextTransform=uppercase&secondaryIconColor=%23FFFFFF&secondaryIconSize=24&secondaryIconPosition=right)](./LICENSE)
+[![Written by Python](https://forthebadge.com/api/badges/generate?panels=2&primaryLabel=WRITTEN+BY&secondaryLabel=Python&primaryBGColor=%238fc965&primaryTextColor=%23FFFFFF&secondaryBGColor=%23419b5a&secondaryTextColor=%23FFFFFF&primaryFontSize=12&primaryFontWeight=300&primaryLetterSpacing=2&primaryFontFamily=Montserrat&primaryTextTransform=uppercase&secondaryFontSize=12&secondaryFontWeight=900&secondaryLetterSpacing=2&secondaryFontFamily=Montserrat&secondaryTextTransform=uppercase&secondaryIcon=python&secondaryIconColor=%23FFFFFF&secondaryIconSize=24&secondaryIconPosition=right)](https://www.python.org/)
+
 gataku は「画像」と「魚拓」を組み合わせた造語で、フェディバースの
 ブックマークメディアをアーカイブするためのツールです。名前は日本語の
 語感を大切にしつつ、グローバルでも扱いやすいようにアルファベット表記
@@ -139,6 +142,12 @@ GPL の条件を守る限り、ソフトウェアを利用・改変・再配布�
 
 Issue や Pull Request は歓迎します。責任ある利用を前提に、改善案や
 バグ報告をお待ちしています。
+
+
+## 🔗 関連プロジェクト
+
+- [miruzo-core](https://github.com/mntone/miruzo-core) — FastAPI/SQLModel ベースのバックエンド
+- [miruzo-web](https://github.com/mntone/miruzo-web) — miruzo-core API を利用する Solid.js 製フロントエンド
 
 
 ## 👤 問い合わせ先

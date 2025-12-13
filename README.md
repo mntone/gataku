@@ -2,6 +2,9 @@ English | [日本語](./README.ja.md)
 
 # gataku (also written as “画拓”)
 
+[![License under GPLv3](https://forthebadge.com/api/badges/generate?panels=2&primaryLabel=LICENSE&secondaryLabel=GPL%203%2B&primaryBGColor=%23555555&primaryTextColor=%23FFFFFF&secondaryBGColor=%23007ec6&secondaryTextColor=%23FFFFFF&primaryFontSize=12&primaryFontWeight=300&primaryLetterSpacing=2&primaryFontFamily=Montserrat&primaryTextTransform=uppercase&secondaryFontSize=12&secondaryFontWeight=900&secondaryLetterSpacing=2&secondaryFontFamily=Montserrat&secondaryTextTransform=uppercase&secondaryIconColor=%23FFFFFF&secondaryIconSize=24&secondaryIconPosition=right)](./LICENSE)
+[![Written by Python](https://forthebadge.com/api/badges/generate?panels=2&primaryLabel=WRITTEN+BY&secondaryLabel=Python&primaryBGColor=%238fc965&primaryTextColor=%23FFFFFF&secondaryBGColor=%23419b5a&secondaryTextColor=%23FFFFFF&primaryFontSize=12&primaryFontWeight=300&primaryLetterSpacing=2&primaryFontFamily=Montserrat&primaryTextTransform=uppercase&secondaryFontSize=12&secondaryFontWeight=900&secondaryLetterSpacing=2&secondaryFontFamily=Montserrat&secondaryTextTransform=uppercase&secondaryIcon=python&secondaryIconColor=%23FFFFFF&secondaryIconSize=24&secondaryIconPosition=right)](https://www.python.org/)
+
 gataku is a playful portmanteau of “image” and the Japanese word for
 archiving (“gyotaku”). It’s a Fediverse-friendly tool for collecting the
 media you’ve bookmarked on Mastodon-compatible servers. The name nods to
@@ -138,6 +141,12 @@ provided that any derivative work is also distributed under the same license.
 ## 🤝 Contributing
 
 Issues and pull requests are welcome—just remember the emphasis on responsible use.
+
+
+## 🔗 Related Projects
+
+- [miruzo-core](https://github.com/mntone/miruzo-core) — FastAPI/SQLModel backend (this repository)
+- [miruzo-web](https://github.com/mntone/miruzo-web) — Solid.js frontend that consumes the core APIs
 
 
 ## 👤 Contact
